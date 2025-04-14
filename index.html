@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>SFZ Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f4f4f4; }
+    input, textarea, button, label { width: 100%; margin: 10px 0; font-size: 1em; }
+    textarea { height: 300px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
+
+  <label>1. Notennamen pro Oktave (z.B. C, D#, F, G#):</label>
+  <input type="text" id="notes" placeholder="C, D#, F, G#" value="C, D, E, F, G, A, B">
+
+  <label>2. Anzahl der Oktaven:</label>
+  <input type="number" id="octaves" value="3">
+
+  <label>3. Dateinamen-Pattern (Nutze [Note], [Layer]):</label>
+  <input type="text" id="filenamePattern" value="Piano_[Note]_vel[Layer].wav">
+
+  <label>4. Sample-Ordner (optional, z.B. Samples/Piano):</label>
+  <input type="text" id="folder" value="Samples/Piano">
+
+  <label><input type="checkbox" id="useVelocity" onchange="toggleVelocity()"> Velocity-Layers aktivieren</label>
+
+  <div id="velocityOptions" class="hidden">
+    <label>5. Velocity-Bereiche (z.B. 0-40,41-90,91-127):</label>
+    <input type="text" id="velocityRanges" value="0-40,41-90,91-127">
+  </div>
+
+  <label>6. Name der SFZ-Datei (ohne .sfz):</label>
+  <input type="text" id="sfzName" value="instrument">
+
+  <button onclick="generateAndDownloadSFZ()">SFZ generieren & als ZIP herunterladen</button>
+
+  <label>SFZ Vorschau:</label>
+  <textarea id="output" readonly></textarea>
+
+  <script>
+    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    function toggleVelocity() {
+      const checkbox = document.getElementById("useVelocity");
+      document.getElementById("velocityOptions").classList.toggle("hidden", !checkbox.checked);
+    }
+
+    function noteToMidi(note, octave) {
+      const index = NOTE_NAMES.indexOf(note);
+      return index + (octave + 1) * 12;
+    }
+
+    function midiToNote(midi) {
+      const name = NOTE_NAMES[midi % 12];
+      const octave = Math.floor(midi / 12) - 1;
+      return `${name}${octave}`;
+    }
+
+    function parseVelocityRanges(input) {
+      return input.split(',').map(range => {
+        const [low, high] = range.split('-').map(n => parseInt(n.trim()));
+        return { low, high };
+      });
+    }
+
+    function generateSFZContent(noteInput, octaves, pattern, folder, useVel, velocityRanges) {
+      const noteNames = noteInput.split(',').map(n => n.trim());
+      let notes = [];
+
+      for (let oct = 0; oct < octaves; oct++) {
+        for (let note of noteNames) {
+          if (!NOTE_NAMES.includes(note)) {
+            alert(`Ungültiger Notenname: ${note}`);
+            return "";
+          }
+          let midi = noteToMidi(note, oct);
+          notes.push({ note: note, octave: oct, midi: midi });
+        }
+      }
+
+      notes.sort((a, b) => a.midi - b.midi);
+      let result = "";
+
+      for (let i = 0; i < notes.length; i++) {
+        const current = notes[i];
+        const midi = current.midi;
+        let low, high;
+
+        if (i === 0) {
+          const next = notes[i + 1];
+          const split = Math.floor((next.midi - midi) / 2);
+          low = 0;
+          high = midi + split;
+        } else if (i === notes.length - 1) {
+          const prev = notes[i - 1];
+          const split = Math.floor((midi - prev.midi) / 2);
+          low = midi - split;
+          high = 127;
+        } else {
+          const prev = notes[i - 1];
+          const next = notes[i + 1];
+          const lowSplit = Math.floor((midi - prev.midi) / 2);
+          const highSplit = Math.floor((next.midi - midi) / 2);
+          low = midi - lowSplit;
+          high = midi + highSplit;
+        }
+
+        const noteLabel = `${current.note}${current.octave}`;
+
+        if (useVel) {
+          velocityRanges.forEach((range, idx) => {
+            const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("[Layer]", (idx + 1))}`;
+            result += `<region>\n`;
+            result += `sample=${filename}\n`;
+            result += `lokey=${low}\n`;
+            result += `hikey=${high}\n`;
+            result += `pitch_keycenter=${midi}\n`;
+            result += `lovel=${range.low}\n`;
+            result += `hivel=${range.high}\n\n`;
+          });
+        } else {
+          const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("_vel[Layer]", "")}`;
+          result += `<region>\n`;
+          result += `sample=${filename}\n`;
+          result += `lokey=${low}\n`;
+          result += `hikey=${high}\n`;
+          result += `pitch_keycenter=${midi}\n\n`;
+        }
+      }
+
+      return result.trim();
+    }
+
+    function generateAndDownloadSFZ() {
+      const notes = document.getElementById("notes").value;
+      const octaves = parseInt(document.getElementById("octaves").value);
+      const pattern = document.getElementById("filenamePattern").value;
+      const folder = document.getElementById("folder").value;
+      const sfzName = document.getElementById("sfzName").value || "instrument";
+      const useVel = document.getElementById("useVelocity").checked;
+      const velRangeInput = document.getElementById("velocityRanges").value;
+      const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [];
+
+      const sfzContent = generateSFZContent(notes, octaves, pattern, folder, useVel, velocityRanges);
+      document.getElementById("output").value = sfzContent;
+
+      const zip = new JSZip();
+      zip.file(`${sfzName}.sfz`, sfzContent);
+
+      zip.generateAsync({ type: "blob" }).then(function (blob) {
+        saveAs(blob, `${sfzName}.zip`);
+      });
+    }
+  </script>
+</body>
+</html>
