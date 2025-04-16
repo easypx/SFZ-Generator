@@ -6,6 +6,9 @@
     <title>SFZ Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/@tonejs/midi"></script>
+
+
     <style>
         :root {
             --bg: #f4f4f4;
@@ -86,8 +89,11 @@
 <body>
     <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
 
-    <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave. <a
-            href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a> </p>
+    <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave.
+        Optional kann ein MIDI-File generiert werden, mit dem man in der DAW die einzelnen Noten rendern kann.
+        Reaper bietet zusaetzlich das Rendern von Regions als einzelne Audio-Files, die leicht erzeugt werden koennen.
+        <a href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a>
+    </p>
 
     <label>Author:</label>
     <input type="text" id="author" placeholder="Your Name" value="Your Name">
@@ -120,7 +126,9 @@
     <input type="text" id="sfzName" value="instrument">
 
     <button onclick="generateSFZ()">SFZ generieren</button>
-    <button onclick="downloadSFZ()">als ZIP herunterladen</button>
+    <button onclick="downloadSFZ()">ZIP herunterladen</button>
+    <button onclick="sfzToMidi()">🎵 MIDI-Datei generieren</button>
+
 
     <label>SFZ Vorschau: (editierbar)</label>
     <textarea id="output"></textarea>
@@ -252,7 +260,7 @@
         }
 
         function generateSFZ() {
-            const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 20250416\n";
+            const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n";
             const author = document.getElementById("author").value;
             const comment = document.getElementById("comment").value;
             const notes = document.getElementById("notes").value;
@@ -289,7 +297,54 @@
             }
         }
 
+        function sfzToMidi() {
+            const author = document.getElementById("author").value;
+            const notesInput = document.getElementById("notes").value;
+            const octaves = parseInt(document.getElementById("octaves").value);
+            const useVel = document.getElementById("useVelocity").checked;
+            const velRangeInput = document.getElementById("velocityRanges").value;
+            const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [{ low: 80, high: 80 }];
+            const sfzName = document.getElementById("sfzName").value || "instrument";
+
+            const noteNames = notesInput.split(',').map(n => n.trim());
+            const midi = new Midi();
+            midi.header.name = `${sfzName} Render MIDI`;
+            const track = midi.addTrack();
+            track.name = `SFZ Test`;
+
+            let time = 0;
+
+            for (let oct = 0; oct < octaves; oct++) {
+                for (let note of noteNames) {
+                    if (!NOTE_NAMES.includes(note)) continue;
+                    const midiNote = noteToMidi(note, oct);
+                    const noteLabel = `${note}${oct}`;
+
+                    velocityRanges.forEach(range => {
+                        const velocity = Math.round((range.low + range.high) / 2) / 127;
+                        track.addNote({
+                            name: midiToNote(midiNote),
+                            midi: midiNote,
+                            time: time,
+                            duration: 4, // Ganze Note
+                            velocity: velocity
+                        });
+                        time += 4; // nächste Note nach einer ganzen
+                    });
+                }
+            }
+
+            // MIDI -> Blob -> ZIP
+            const zip = new JSZip();
+            const midiBytes = midi.toArray();
+            zip.file(`${sfzName}.mid`, new Uint8Array(midiBytes));
+            zip.generateAsync({ type: "blob" }).then(blob => {
+                saveAs(blob, `${sfzName}_midi.zip`);
+            });
+        }
+
     </script>
+
     <script>
         const themeToggle = document.getElementById("themeToggle");
 
