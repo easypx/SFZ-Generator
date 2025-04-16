@@ -72,7 +72,7 @@
 
   <script>
     const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    errorCode = 2; // kein Output
+    errorCode = 2; // Initialisieren: kein Output
     const errorCodes = {
       0: 'Keine Fehler',
       1: 'Ungueltiger Notenname',
@@ -139,7 +139,7 @@
           // letzte Note
         } else if (i === notes.length - 1) {
           const prev = notes[i - 1];
-          const split = Math.ceil((midi - prev.midi) / 2);          
+          const split = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss         
           low = midi - split + 1; // um 1 anheben, um Ueberschneidungen zu verhindern 
           high = 127;
           // alle Noten zwischen erster und letzter Note
