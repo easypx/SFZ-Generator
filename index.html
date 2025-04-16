@@ -128,15 +128,14 @@
           const next = notes[i + 1];
           const split = Math.floor((next.midi - midi) / 2);
           low = 0;
-          high = midi + split;
-          // alle Noten zwischen erster und letzter Note
+          high = midi + split;          
+          // letzte Note
         } else if (i === notes.length - 1) {
           const prev = notes[i - 1];
           const split = Math.floor((midi - prev.midi) / 2);
           low = midi - split + 1; // um 1 anheben, um Ueberschneidungen zu verhindern 
           high = 127;
-
-          // letzte Note
+          // alle Noten zwischen erster und letzter Note
         } else {
           const prev = notes[i - 1];
           const next = notes[i + 1];
