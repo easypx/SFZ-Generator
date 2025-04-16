@@ -7,7 +7,7 @@ SFZ is a plain text file format that stores instrument data for sampled instrume
 Ein Multisample erzeugen:
 1. Instrument einer DAW samplen (alle gewuenschten Noten als ein Audio File rendern)
 2. Normalisieren
-3. Slicen der Samples https://github.com/flutydeer/audio-slicer (Treshold nutzen fuer Decay Level)
+3. Slicen der Samples https://github.com/flutydeer/audio-slicer (Treshold nutzen fuer Decay Level z.B. -96dB)
 4. Nachbearbeiten in Audacity (Startpunkt korrigieren)
 5. Umbenennen nach Muster in SFZ-Generator
 6. SFZ generieren
