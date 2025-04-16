@@ -11,3 +11,4 @@ Ein Multisample erzeugen:
 4. Nachbearbeiten in Audacity (Startpunkt korrigieren)
 5. Umbenennen nach Muster in SFZ-Generator
 6. SFZ generieren
+7. Laden und spielen https://www.zampler.de/
