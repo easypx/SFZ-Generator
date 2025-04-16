@@ -2,234 +2,314 @@
 <html lang="de">
 
 <head>
-  <meta charset="UTF-8">
-  <title>SFZ Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2em;
-      background: #f4f4f4;
-    }
+    <meta charset="UTF-8">
+    <title>SFZ Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --bg: #f4f4f4;
+            --text: #111;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --textarea-bg: #fff;
+            --button-bg: #e0e0e0;
+        }
 
-    input,
-    textarea,
-    button,
-    label {
-      width: 100%;
-      margin: 10px 0;
-      font-size: 1em;
-    }
+        body.dark {
+            --bg: #1e1e1e;
+            --text: #f0f0f0;
+            --input-bg: #2c2c2c;
+            --input-border: #555;
+            --textarea-bg: #2a2a2a;
+            --button-bg: #444;
+        }
 
-    textarea {
-      height: 300px;
-    }
+        body {
+            font-family: sans-serif;
+            padding: 2em;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
 
-    .hidden {
-      display: none;
-    }
-  </style>
+        input,
+        textarea,
+        button {
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1em;
+            color: var(--text);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            padding: 0.4em;
+            box-sizing: border-box;
+        }
+
+        label {
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1em;
+            color: var(--text);
+        }
+
+        textarea {
+            height: 300px;
+            background: var(--textarea-bg);
+        }
+
+        button {
+            background: var(--button-bg);
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .theme-switch {
+            position: absolute;
+            top: 1em;
+            right: 2em;
+        }
+
+        .theme-switch label {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 
 <body>
-  <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
+    <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
 
-  <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave.  <a href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a> </p>
+    <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave. <a
+            href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a> </p>
 
-  <label>Author:</label>
-  <input type="text" id="author" placeholder="Your Name" value="Your Name">
+    <label>Author:</label>
+    <input type="text" id="author" placeholder="Your Name" value="Your Name">
 
-  <label>Comment:</label>
-  <input type="text" id="comment" placeholder="e.g. instrument name" value="Steinway Grand Piano">
+    <label>Comment:</label>
+    <input type="text" id="comment" placeholder="e.g. instrument name" value="Steinway Grand Piano">
 
-  <label>Notennamen pro Oktave (z.B. C, D#, F, G#):</label>
-  <input type="text" id="notes" placeholder="C, D#, F#, A" value="C, D#, F#, A">
+    <label>Notennamen pro Oktave (z.B. C, D#, F, G#):</label>
+    <input type="text" id="notes" placeholder="C, D#, F#, A" value="C, D#, F#, A">
 
-  <label>Anzahl der Oktaven:</label>
-  <input type="number" id="octaves" value="3">
+    <label>Anzahl der Oktaven:</label>
+    <input type="number" id="octaves" value="3">
 
-  <label>Dateinamen-Pattern (Nutze [Note], [Layer]):</label>
-  <input type="text" id="filenamePattern" value="Piano_[Note]_vel[Layer].wav">
+    <label>Dateinamen-Pattern (Nutze [Note], [Layer]):</label>
+    <input type="text" id="filenamePattern" value="Piano_[Note]_vel[Layer].wav">
 
-  <label>Sample-Ordner (optional, z.B. Samples/Piano):</label>
-  <input type="text" id="folder" value="Samples/Piano">
+    <label>Sample-Ordner (optional, z.B. Samples/Piano):</label>
+    <input type="text" id="folder" value="Samples/Piano">
 
-  <div>
-    <label>Velocity-Layers aktivieren<input type="checkbox" id="useVelocity" onchange="toggleVelocity()"></label>
-    <div id="velocityOptions" class="hidden">
-      <br>
-      <label>Velocity-Bereiche (z.B. 0-40,41-90,91-127):</label>
-      <input type="text" id="velocityRanges" value="0-40,41-90,91-127">
+    <div>
+        <label>Velocity-Layers aktivieren<input type="checkbox" id="useVelocity" onchange="toggleVelocity()"></label>
+        <div id="velocityOptions" class="hidden">
+            <br>
+            <label>Velocity-Bereiche (z.B. 0-40,41-90,91-127):</label>
+            <input type="text" id="velocityRanges" value="0-40,41-90,91-127">
+        </div>
     </div>
-  </div>
-  <br>
-  <label>Name der SFZ-Datei (ohne .sfz):</label>
-  <input type="text" id="sfzName" value="instrument">
+    <br>
+    <label>Name der SFZ-Datei (ohne .sfz):</label>
+    <input type="text" id="sfzName" value="instrument">
 
-  <button onclick="generateSFZ()">SFZ generieren</button>
-  <button onclick="downloadSFZ()">als ZIP herunterladen</button>
+    <button onclick="generateSFZ()">SFZ generieren</button>
+    <button onclick="downloadSFZ()">als ZIP herunterladen</button>
 
-  <label>SFZ Vorschau: (editierbar)</label>
-  <textarea id="output"></textarea>
+    <label>SFZ Vorschau: (editierbar)</label>
+    <textarea id="output"></textarea>
 
-  <script>
-    const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    errorCode = 2; // Initialisieren: kein Output
-    const errorCodes = {
-      0: 'Keine Fehler',
-      1: 'Ungueltiger Notenname',
-      2: 'Kein Output',
-      3: "Ungültige Velocity-Bereiche: Achte auf Reihenfolge und Werte von 0–127."
-    };
+    <!-- Dark Mode Umschalter -->
+    <div class="theme-switch">
+        <label>
+            <input type="checkbox" id="themeToggle">
+            🌙 Dunkelmodus
+        </label>
+    </div>
 
-    function toggleVelocity() {
-      const checkbox = document.getElementById("useVelocity");
-      document.getElementById("velocityOptions").classList.toggle("hidden", !checkbox.checked);
-    }
+    <script>
+        const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        errorCode = 2; // Initialisieren: kein Output
+        const errorCodes = {
+            0: 'Keine Fehler',
+            1: 'Ungueltiger Notenname',
+            2: 'Kein Output',
+            3: "Ungültige Velocity-Bereiche: Achte auf Reihenfolge und Werte von 0–127."
+        };
 
-    function noteToMidi(note, octave) {
-      const index = NOTE_NAMES.indexOf(note);
-      return index + (octave + 1) * 12;
-    }
-
-    function midiToNote(midi) {
-      const name = NOTE_NAMES[midi % 12];
-      const octave = Math.floor(midi / 12) - 1;
-      return `${name}${octave}`;
-    }
-
-    function parseVelocityRanges(input) {
-      return input.split(',').map(range => {
-        const [low, high] = range.split('-').map(n => parseInt(n.trim()));
-        return { low, high };
-      });
-    }
-
-    function generateSFZContent(header, author, comment, noteInput, octaves, pattern, folder, useVel, velocityRanges) {
-      const noteNames = noteInput.split(',').map(n => n.trim());
-      let notes = [];
-
-      for (let oct = 0; oct < octaves; oct++) {
-        for (let note of noteNames) {
-          if (!NOTE_NAMES.includes(note)) {
-            errorCode = 1;
-            alert(`Fehler: ${errorCodes[errorCode]}: ${note}`);
-            return errorCode;
-          }
-          let midi = noteToMidi(note, oct);
-          notes.push({ note: note, octave: oct, midi: midi });
-        }
-      }
-
-      notes.sort((a, b) => a.midi - b.midi);
-      let result = "";
-      result += header;
-      result += `//Author: ${author}\n`;
-      result += `//Date: ${new Date().toUTCString()}\n`; 
-      result += `//Comment: ${comment}\n\n`;      
-
-      for (let i = 0; i < notes.length; i++) {
-        const current = notes[i];
-        const midi = current.midi;
-        let low, high;
-
-        // erste Note
-        if (i === 0) {
-          const next = notes[i + 1];
-          const split = Math.floor((next.midi - midi) / 2);
-          low = 0;
-          high = midi + split;
-          // letzte Note
-        } else if (i === notes.length - 1) {
-          const prev = notes[i - 1];
-          const split = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss         
-          low = midi - split + 1; // um 1 anheben, um Ueberschneidungen zu verhindern 
-          high = 127;
-          // alle Noten zwischen erster und letzter Note
-        } else {
-          const prev = notes[i - 1];
-          const next = notes[i + 1];
-          const lowSplit = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss
-          const highSplit = Math.floor((next.midi - midi) / 2);
-          low = midi - lowSplit + 1; // um 1 anheben, um Ueberschneidungen zu verhindern
-          high = midi + highSplit;
+        function toggleVelocity() {
+            const checkbox = document.getElementById("useVelocity");
+            document.getElementById("velocityOptions").classList.toggle("hidden", !checkbox.checked);
         }
 
-        const noteLabel = `${current.note}${current.octave}`;
-
-        if (useVel) {
-          velocityRanges.forEach((range, idx) => {
-            const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("[Layer]", (idx + 1))}`;
-            result += `<region>\n`;
-            result += `sample=${filename}\n`;
-            result += `lokey=${low}\n`;
-            result += `hikey=${high}\n`;
-            result += `pitch_keycenter=${midi}\n`;
-            result += `lovel=${range.low}\n`;
-            result += `hivel=${range.high}\n\n`;
-          });
-        } else {
-          const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("_vel[Layer]", "")}`;
-          result += `<region>\n`;
-          result += `sample=${filename}\n`;
-          result += `lokey=${low}\n`;
-          result += `hikey=${high}\n`;
-          result += `pitch_keycenter=${midi}\n\n`;
+        function noteToMidi(note, octave) {
+            const index = NOTE_NAMES.indexOf(note);
+            return index + (octave + 1) * 12;
         }
-      }
-      errorCode = 0; // alles Ok
-      return result.trim();
-    }
 
-    function isValidVelocityRanges(ranges) {
-      for (let i = 0; i < ranges.length; i++) {
-        const { low, high } = ranges[i];
-        if (low < 0 || high > 127 || low > high) return false;
-        if (i > 0 && ranges[i - 1].high >= low) return false;
-      }
-      return true;
-    }
+        function midiToNote(midi) {
+            const name = NOTE_NAMES[midi % 12];
+            const octave = Math.floor(midi / 12) - 1;
+            return `${name}${octave}`;
+        }
 
-    function generateSFZ() {
-      const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n";
-      const author = document.getElementById("author").value;
-      const comment = document.getElementById("comment").value;
-      const notes = document.getElementById("notes").value;
-      const octaves = parseInt(document.getElementById("octaves").value);
-      const pattern = document.getElementById("filenamePattern").value;
-      const folder = document.getElementById("folder").value;
-      const useVel = document.getElementById("useVelocity").checked;
-      const velRangeInput = document.getElementById("velocityRanges").value;
-      const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [];
-      if (useVel && !isValidVelocityRanges(velocityRanges)) {
-        errorCode = 3;
-        alert(`Fehler: ${errorCodes[errorCode]}`);
-        return;
-      }
+        function parseVelocityRanges(input) {
+            return input.split(',').map(range => {
+                const [low, high] = range.split('-').map(n => parseInt(n.trim()));
+                return { low, high };
+            });
+        }
 
-      const sfzContent = generateSFZContent(header, author, comment, notes, octaves, pattern, folder, useVel, velocityRanges);
-      document.getElementById("output").value = sfzContent;
-    }
+        function generateSFZContent(header, author, comment, noteInput, octaves, pattern, folder, useVel, velocityRanges) {
+            const noteNames = noteInput.split(',').map(n => n.trim());
+            let notes = [];
 
-    function downloadSFZ() {
-      if (errorCode > 0) {
-        alert(`Fehler: ${errorCodes[errorCode]}`);
-        return;
-      }
+            for (let oct = 0; oct < octaves; oct++) {
+                for (let note of noteNames) {
+                    if (!NOTE_NAMES.includes(note)) {
+                        errorCode = 1;
+                        alert(`Fehler: ${errorCodes[errorCode]}: ${note}`);
+                        return errorCode;
+                    }
+                    let midi = noteToMidi(note, oct);
+                    notes.push({ note: note, octave: oct, midi: midi });
+                }
+            }
 
-      else if (errorCode == 0) {
-        const zip = new JSZip();
-        sfzContent = document.getElementById("output").value;
-        const sfzName = document.getElementById("sfzName").value || "instrument";
-        zip.file(`${sfzName}.sfz`, sfzContent);
-        zip.generateAsync({ type: "blob" }).then(function (blob) {
-          saveAs(blob, `${sfzName}.zip`);
+            notes.sort((a, b) => a.midi - b.midi);
+            let result = "";
+            result += header;
+            result += `//Author: ${author}\n`;
+            result += `//Date: ${new Date().toUTCString()}\n`;
+            result += `//Comment: ${comment}\n\n`;
+
+            for (let i = 0; i < notes.length; i++) {
+                const current = notes[i];
+                const midi = current.midi;
+                let low, high;
+
+                // erste Note
+                if (i === 0) {
+                    const next = notes[i + 1];
+                    const split = Math.floor((next.midi - midi) / 2);
+                    low = 0;
+                    high = midi + split;
+                    // letzte Note
+                } else if (i === notes.length - 1) {
+                    const prev = notes[i - 1];
+                    const split = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss         
+                    low = midi - split + 1; // um 1 anheben, um Ueberschneidungen zu verhindern 
+                    high = 127;
+                    // alle Noten zwischen erster und letzter Note
+                } else {
+                    const prev = notes[i - 1];
+                    const next = notes[i + 1];
+                    const lowSplit = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss
+                    const highSplit = Math.floor((next.midi - midi) / 2);
+                    low = midi - lowSplit + 1; // um 1 anheben, um Ueberschneidungen zu verhindern
+                    high = midi + highSplit;
+                }
+
+                const noteLabel = `${current.note}${current.octave}`;
+
+                if (useVel) {
+                    velocityRanges.forEach((range, idx) => {
+                        const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("[Layer]", (idx + 1))}`;
+                        result += `<region>\n`;
+                        result += `sample=${filename}\n`;
+                        result += `lokey=${low}\n`;
+                        result += `hikey=${high}\n`;
+                        result += `pitch_keycenter=${midi}\n`;
+                        result += `lovel=${range.low}\n`;
+                        result += `hivel=${range.high}\n\n`;
+                    });
+                } else {
+                    const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("_vel[Layer]", "")}`;
+                    result += `<region>\n`;
+                    result += `sample=${filename}\n`;
+                    result += `lokey=${low}\n`;
+                    result += `hikey=${high}\n`;
+                    result += `pitch_keycenter=${midi}\n\n`;
+                }
+            }
+            errorCode = 0; // alles Ok
+            return result.trim();
+        }
+
+        function isValidVelocityRanges(ranges) {
+            for (let i = 0; i < ranges.length; i++) {
+                const { low, high } = ranges[i];
+                if (low < 0 || high > 127 || low > high) return false;
+                if (i > 0 && ranges[i - 1].high >= low) return false;
+            }
+            return true;
+        }
+
+        function generateSFZ() {
+            const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n";
+            const author = document.getElementById("author").value;
+            const comment = document.getElementById("comment").value;
+            const notes = document.getElementById("notes").value;
+            const octaves = parseInt(document.getElementById("octaves").value);
+            const pattern = document.getElementById("filenamePattern").value;
+            const folder = document.getElementById("folder").value;
+            const useVel = document.getElementById("useVelocity").checked;
+            const velRangeInput = document.getElementById("velocityRanges").value;
+            const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [];
+            if (useVel && !isValidVelocityRanges(velocityRanges)) {
+                errorCode = 3;
+                alert(`Fehler: ${errorCodes[errorCode]}`);
+                return;
+            }
+
+            const sfzContent = generateSFZContent(header, author, comment, notes, octaves, pattern, folder, useVel, velocityRanges);
+            document.getElementById("output").value = sfzContent;
+        }
+
+        function downloadSFZ() {
+            if (errorCode > 0) {
+                alert(`Fehler: ${errorCodes[errorCode]}`);
+                return;
+            }
+
+            else if (errorCode == 0) {
+                const zip = new JSZip();
+                sfzContent = document.getElementById("output").value;
+                const sfzName = document.getElementById("sfzName").value || "instrument";
+                zip.file(`${sfzName}.sfz`, sfzContent);
+                zip.generateAsync({ type: "blob" }).then(function (blob) {
+                    saveAs(blob, `${sfzName}.zip`);
+                });
+            }
+        }
+
+    </script>
+    <script>
+        const themeToggle = document.getElementById("themeToggle");
+
+        // Theme setzen basierend auf gespeichertem Wert
+        function applyTheme(theme) {
+            document.body.classList.toggle("dark", theme === "dark");
+            themeToggle.checked = theme === "dark";
+        }
+
+        themeToggle.addEventListener("change", () => {
+            const newTheme = themeToggle.checked ? "dark" : "light";
+            localStorage.setItem("theme", newTheme);
+            applyTheme(newTheme);
         });
-      }
-    }
 
-  </script>
+        // Beim Laden anwenden
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+    </script>
+
 </body>
 
 </html>
