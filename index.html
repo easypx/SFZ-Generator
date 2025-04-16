@@ -35,10 +35,13 @@
 <body>
   <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
 
-  <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave.</p>
+  <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave.  <a href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a> </p>
 
   <label>Author:</label>
   <input type="text" id="author" placeholder="Your Name" value="Your Name">
+
+  <label>Comment:</label>
+  <input type="text" id="comment" placeholder="e.g. instrument name" value="Steinway Grand Piano">
 
   <label>Notennamen pro Oktave (z.B. C, D#, F, G#):</label>
   <input type="text" id="notes" placeholder="C, D#, F#, A" value="C, D#, F#, A">
@@ -103,7 +106,7 @@
       });
     }
 
-    function generateSFZContent(header, author, noteInput, octaves, pattern, folder, useVel, velocityRanges) {
+    function generateSFZContent(header, author, comment, noteInput, octaves, pattern, folder, useVel, velocityRanges) {
       const noteNames = noteInput.split(',').map(n => n.trim());
       let notes = [];
 
@@ -121,9 +124,10 @@
 
       notes.sort((a, b) => a.midi - b.midi);
       let result = "";
-      result += `//Author: ${author}\n`;
-      result += `//Generiert am: ${new Date().toUTCString()}\n`;
       result += header;
+      result += `//Author: ${author}\n`;
+      result += `//Date: ${new Date().toUTCString()}\n`; 
+      result += `//Comment: ${comment}\n\n`;      
 
       for (let i = 0; i < notes.length; i++) {
         const current = notes[i];
@@ -188,8 +192,9 @@
     }
 
     function generateSFZ() {
-      const header = "//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n\n";
+      const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n";
       const author = document.getElementById("author").value;
+      const comment = document.getElementById("comment").value;
       const notes = document.getElementById("notes").value;
       const octaves = parseInt(document.getElementById("octaves").value);
       const pattern = document.getElementById("filenamePattern").value;
@@ -203,7 +208,7 @@
         return;
       }
 
-      const sfzContent = generateSFZContent(header, author, notes, octaves, pattern, folder, useVel, velocityRanges);
+      const sfzContent = generateSFZContent(header, author, comment, notes, octaves, pattern, folder, useVel, velocityRanges);
       document.getElementById("output").value = sfzContent;
     }
 
