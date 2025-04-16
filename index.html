@@ -96,7 +96,7 @@
     </p>
 
     <label>Author:</label>
-    <input type="text" id="author" placeholder="Your Name" value="Your Name">
+    <input type="text" id="author" placeholder="Your Name" value="Donald Duck">
 
     <label>Comment:</label>
     <input type="text" id="comment" placeholder="e.g. instrument name" value="Steinway Grand Piano">
@@ -260,7 +260,7 @@
         }
 
         function generateSFZ() {
-            const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 202250416\n";
+            const header = "//---------------------------------------------------------------------------------\n// SFZ Definition File\n//---------------------------------------------------------------------------------\n//Tool: https://easypx.github.io/SFZ-Generator | https://www.youtube.com/@Klangraum \n//Version: 20250416\n";
             const author = document.getElementById("author").value;
             const comment = document.getElementById("comment").value;
             const notes = document.getElementById("notes").value;
