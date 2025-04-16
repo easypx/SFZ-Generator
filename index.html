@@ -139,14 +139,14 @@
           // letzte Note
         } else if (i === notes.length - 1) {
           const prev = notes[i - 1];
-          const split = Math.floor((midi - prev.midi) / 2);          
+          const split = Math.ceil((midi - prev.midi) / 2);          
           low = midi - split + 1; // um 1 anheben, um Ueberschneidungen zu verhindern 
           high = 127;
           // alle Noten zwischen erster und letzter Note
         } else {
           const prev = notes[i - 1];
           const next = notes[i + 1];
-          const lowSplit = Math.ceil((midi - prev.midi) / 2); // Aufrunden
+          const lowSplit = Math.ceil((midi - prev.midi) / 2); // Aufrunden, weil Abstand > 0 sein muss
           const highSplit = Math.floor((next.midi - midi) / 2);
           low = midi - lowSplit + 1; // um 1 anheben, um Ueberschneidungen zu verhindern
           high = midi + highSplit;
