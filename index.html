@@ -73,7 +73,8 @@
     const errorCodes = {
       0: 'Keine Fehler',
       1: 'Ungueltiger Notenname',
-      2: 'Kein Output'
+      2: 'Kein Output',
+      3: "Ungültige Velocity-Bereiche: Achte auf Reihenfolge und Werte von 0–127."
     };
 
     function toggleVelocity() {
@@ -128,7 +129,7 @@
           const next = notes[i + 1];
           const split = Math.floor((next.midi - midi) / 2);
           low = 0;
-          high = midi + split;          
+          high = midi + split;
           // letzte Note
         } else if (i === notes.length - 1) {
           const prev = notes[i - 1];
@@ -171,6 +172,15 @@
       return result.trim();
     }
 
+    function isValidVelocityRanges(ranges) {
+      for (let i = 0; i < ranges.length; i++) {
+        const { low, high } = ranges[i];
+        if (low < 0 || high > 127 || low > high) return false;
+        if (i > 0 && ranges[i - 1].high >= low) return false;
+      }
+      return true;
+    }
+
     function generateSFZ() {
       const notes = document.getElementById("notes").value;
       const octaves = parseInt(document.getElementById("octaves").value);
@@ -179,6 +189,11 @@
       const useVel = document.getElementById("useVelocity").checked;
       const velRangeInput = document.getElementById("velocityRanges").value;
       const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [];
+      if (useVel && !isValidVelocityRanges(velocityRanges)) {
+        errorCode = 3;
+        alert(`Fehler: ${errorCodes[errorCode]}`);
+        return;
+      }
 
       const sfzContent = generateSFZContent(notes, octaves, pattern, folder, useVel, velocityRanges);
       document.getElementById("output").value = sfzContent;
@@ -194,7 +209,7 @@
         const zip = new JSZip();
         sfzContent = document.getElementById("output").value;
         const sfzName = document.getElementById("sfzName").value || "instrument";
-        zip.file(`${sfzName}.sfz`, sfzContent);        
+        zip.file(`${sfzName}.sfz`, sfzContent);
         zip.generateAsync({ type: "blob" }).then(function (blob) {
           saveAs(blob, `${sfzName}.zip`);
         });
