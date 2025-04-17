@@ -20,7 +20,7 @@ Dadurch stimmen alle Noten-Startzeiten und die Regions (aus der CSV-Datei) exakt
 
 1. MIDI-File laden
 2. Region-Marker-Liste importieren im Region-Manager:Options/Import Regions/Markers
-3. evtl. muessen die Noten gestretcht werden (ALT + Grab rechte Seite des MIDI Items)
-4. (Samples optimieren/kuerzen mit https://github.com/flutydeer/audio-slicer)
-5. Rendern mit Bounds/All Project Regions und Filename: Piano_$region
+3. evtl. muessen die Noten gestretcht werden (ALT + Grab rechte Seite des MIDI Items), nicht notwending, wenn Tempo in der DAW vorher auf 60 Bpm eingestellt wurde!
+4. Rendern mit Bounds/All Project Regions und Filename: Piano_$region
+5. (Samples optimieren/kuerzen mit https://github.com/flutydeer/audio-slicer)
 6. Laden und spielen https://www.zampler.de/
