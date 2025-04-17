@@ -12,7 +12,7 @@ SFZ is a plain text file format that stores instrument data for sampled instrume
 5. SFZ generieren
 6. Laden und spielen https://www.zampler.de/
 
-# Nutzung von MIDI und Region CSV: (testet in Reaper 7.19)
+# Nutzung von MIDI und Region Files: (testet in Reaper 7.19)
 1. MIDI file laden
 2. Region Marker Liste importieren im Region Manager/Options/Import Regions/Markers
 3. evtl. muessen die Noten gestretcht werden (ALT + Grab rechte Seite des MIDI Items)
