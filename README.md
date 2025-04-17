@@ -16,6 +16,6 @@ SFZ is a plain text file format that stores instrument data for sampled instrume
 1. MIDI file laden
 2. Region Marker Liste importieren im Region Manager/Options/Import Regions/Markers
 3. evtl. muessen die Noten gestretcht werden (ALT + Grab rechte Seite des MIDI Items)
-4. (evtl. Regions umbenennen, Sample optimieren mit https://github.com/flutydeer/audio-slicer)
-5. Rendern mit Bounds/All Project Regions und Filename: $region
+4. (Samples optimieren/kuerzen mit https://github.com/flutydeer/audio-slicer)
+5. Rendern mit Bounds/All Project Regions und Filename: Piano_$region
 6. Laden und spielen https://www.zampler.de/
