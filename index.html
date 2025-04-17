@@ -96,7 +96,7 @@
     </p>
 
     <label>Author:</label>
-    <input type="text" id="author" placeholder="Your Name" value="Donald Duck">
+    <input type="text" id="author" placeholder="Your Name" value="Your Name">
 
     <label>Comment:</label>
     <input type="text" id="comment" placeholder="e.g. instrument name" value="Steinway Grand Piano">
@@ -126,7 +126,7 @@
     <input type="text" id="sfzName" value="instrument">
 
     <button onclick="generateSFZ()">SFZ generieren</button>
-    <button onclick="downloadSFZ()">SFZ als ZIP herunterladen</button>
+    <button onclick="downloadSFZ()">ZIP herunterladen</button>
     <button onclick="sfzToMidi()">🎵 MIDI-Datei generieren</button>
 
 
@@ -148,7 +148,8 @@
             0: 'Keine Fehler',
             1: 'Ungueltiger Notenname',
             2: 'Kein Output',
-            3: "Ungültige Velocity-Bereiche: Achte auf Reihenfolge und Werte von 0–127."
+            3: 'Ungültige Velocity-Bereiche: Achte auf Reihenfolge und Werte von 0–127.',
+            4: 'Doppelte Notennamen gefunden'
         };
 
         function toggleVelocity() {
@@ -270,6 +271,17 @@
             const useVel = document.getElementById("useVelocity").checked;
             const velRangeInput = document.getElementById("velocityRanges").value;
             const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [];
+
+            // Prüfe auf doppelte Notennamen
+            const noteArray = notes.split(',').map(n => n.trim().toUpperCase());
+            const duplicates = noteArray.filter((note, idx) => noteArray.indexOf(note) !== idx);
+            if (duplicates.length > 0) {
+                errorCode = 4;
+                alert(`Fehler: ${errorCodes[errorCode]} : (${[...new Set(duplicates)].join(', ')})`);
+                return;
+            }
+
+            // Pruefe Velocity Ranges
             if (useVel && !isValidVelocityRanges(velocityRanges)) {
                 errorCode = 3;
                 alert(`Fehler: ${errorCodes[errorCode]}`);
@@ -295,6 +307,27 @@
                     saveAs(blob, `${sfzName}.zip`);
                 });
             }
+        }
+
+        function generateRegionCSV(noteNames, octaves, noteDurationSec) {
+            const lines = ["Number,Name,Start,End,Length,Color"]; // Header-Zeile
+            let index = 1;
+            let currentTime = 0;
+
+            for (let o = 0; o < octaves; o++) {
+                for (let n of noteNames) {
+                    const label = `${n}${o}`;
+                    const start = currentTime.toFixed(3);
+                    const end = (currentTime + noteDurationSec).toFixed(3);
+                    const length = noteDurationSec.toFixed(3);
+
+                    lines.push(`${index},${label},${start},${end},${length},`);
+                    currentTime += noteDurationSec;
+                    index++;
+                }
+            }
+
+            return lines.join("\n");
         }
 
         function sfzToMidi() {
@@ -338,6 +371,13 @@
             const zip = new JSZip();
             const midiBytes = midi.toArray();
             zip.file(`${sfzName}.mid`, new Uint8Array(midiBytes));
+
+            const noteDurationSec = 4; // z. B. jede Note dauert 4 Sekunden
+
+            // CSV zusätzlich generieren
+            const csvContent = generateRegionCSV(noteNames, octaves, noteDurationSec);
+            zip.file(`sfz_regions.csv`, csvContent);
+
             zip.generateAsync({ type: "blob" }).then(blob => {
                 saveAs(blob, `${sfzName}_midi.zip`);
             });
