@@ -89,11 +89,17 @@
 <body>
     <h2>SFZ Generator mit optionalen Velocity-Layers & ZIP Export</h2>
 
-    <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über eine Oktave.
-        Optional kann ein MIDI-File generiert werden, mit dem man in der DAW die einzelnen Noten rendern kann.
-        Reaper bietet zusaetzlich das Rendern von Regions als einzelne Audio-Files, die leicht erzeugt werden koennen.
-        <a href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a>
+    <p>Dieses Tool generiert Multisample-SFZ-Dateien mit gleichmäßig verteilten Notennummern über mehrere Oktaven.
+        Optional kann ein MIDI- und Regions-File generiert werden, mit dem man in einer DAW wie Reaper die einzelnen
+        Noten
+        in einzelne Files rendern kann. (sehr schnell)
     </p>
+    <p> ⚠️ Hinweis:
+        Bitte stelle vor dem Importieren des MIDI-Files in Reaper das Projekttempo manuell auf 60 BPM ein.
+        Dadurch stimmen alle Noten-Startzeiten und die Regions (aus der CSV-Datei) exakt mit dem Raster überein.</p>
+    <p>Weitere Hinweise zur Benutzung: <a
+            href="https://github.com/easypx/SFZ-Generator">https://github.com/easypx/SFZ-Generator</a></p>
+
 
     <label>Author:</label>
     <input type="text" id="author" placeholder="Your Name" value="Your Name">
@@ -340,6 +346,8 @@
             const noteNames = notesInput.split(',').map(n => n.trim());
             const midi = new Midi();
             midi.header.name = `${sfzName} Render MIDI`;
+            midi.header.setTempo(60, 0); // Setzt globales Songtempo
+
             const track = midi.addTrack();
             track.name = `SFZ Test`;
 
