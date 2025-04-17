@@ -229,7 +229,7 @@
 
                 if (useVel) {
                     velocityRanges.forEach((range, idx) => {
-                        const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("[Layer]", (idx + 1))}`;
+                        const filename = `${folder}/${pattern.replace("[Note]", noteLabel).replace("[Layer]", range.high)}`;
                         result += `<region>\n`;
                         result += `sample=${filename}\n`;
                         result += `lokey=${low}\n`;
@@ -365,7 +365,7 @@
                         time += 4; // nächste Note nach einer ganzen
 
                         // Erzeuge Notenname inkl. Velocity Layer
-                        const fullName = `${midiToNote(midiNote)}_vel${velocity * 127}`;
+                        const fullName = `${midiToNote(midiNote)}_vel${range.high}`;
                         // Sammle Namen für Region CSV
                         noteNamesWithLayers.push(fullName);
                     });
