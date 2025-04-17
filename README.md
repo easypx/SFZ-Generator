@@ -4,7 +4,7 @@ Online: https://easypx.github.io/SFZ-Generator/
 
 SFZ is a plain text file format that stores instrument data for sampled instruments. The SFZ format was developed by René Ceballos (founder of rgcaudio)[1] and continues to be used by companies such as Cakewalk, Plogue and Garritan. SFZ is a royalty-free format and can be used by software developers for both free and commercial purposes. The SFZ Format is widely accepted as an open standard to define the behavior of a musical instrument from a bare set of sound recordings. https://en.wikipedia.org/wiki/SFZ_(file_format)
 
-Ein Multisample erzeugen: (ohne Region Rendering)
+# Ein Multisample erzeugen: (ohne Region Rendering)
 1. Instrument (VST) in einer DAW absamplen (alle gewuenschten Noten als ein Audio File rendern)
 2. Normalisieren
 3. Slicen der Samples https://github.com/flutydeer/audio-slicer (Treshold nutzen fuer konstanten Decay Level z.B. -96dB)
@@ -12,7 +12,7 @@ Ein Multisample erzeugen: (ohne Region Rendering)
 5. SFZ generieren
 6. Laden und spielen https://www.zampler.de/
 
-Nutzung von MIDI und Region CSV: (testet in Reaper 7.19)
+# Nutzung von MIDI und Region CSV: (testet in Reaper 7.19)
 1. MIDI file laden
 2. Region Marker Liste importieren im Region Manager/Options/Import Regions/Markers
 3. evtl. muessen die Noten gestretcht werden (ALT + Grab rechte Seite des MIDI Items)
