@@ -309,22 +309,20 @@
             }
         }
 
-        function generateRegionCSV(noteNames, octaves, noteDurationSec) {
+        function generateRegionCSV(noteNamesWithLayers, noteDurationSec) {
             const lines = ["Number,Name,Start,End,Length,Color"]; // Header-Zeile
             let index = 1;
             let currentTime = 0;
 
-            for (let o = 0; o < octaves; o++) {
-                for (let n of noteNames) {
-                    const label = `${n}${o}`;
-                    const start = currentTime.toFixed(3);
-                    const end = (currentTime + noteDurationSec).toFixed(3);
-                    const length = noteDurationSec.toFixed(3);
+            for (let n of noteNamesWithLayers) {
+                const label = `${n}`;
+                const start = currentTime.toFixed(3);
+                const end = (currentTime + noteDurationSec).toFixed(3);
+                const length = noteDurationSec.toFixed(3);
 
-                    lines.push(`${index},${label},${start},${end},${length},`);
-                    currentTime += noteDurationSec;
-                    index++;
-                }
+                lines.push(`${index},${label},${start},${end},${length},`);
+                currentTime += noteDurationSec;
+                index++;
             }
 
             return lines.join("\n");
@@ -347,6 +345,8 @@
 
             let time = 0;
 
+            let noteNamesWithLayers = [];
+
             for (let oct = 0; oct < octaves; oct++) {
                 for (let note of noteNames) {
                     if (!NOTE_NAMES.includes(note)) continue;
@@ -363,9 +363,16 @@
                             velocity: velocity
                         });
                         time += 4; // nächste Note nach einer ganzen
+
+                        // Erzeuge Notenname inkl. Velocity Layer
+                        const fullName = `${midiToNote(midiNote)}_vel${velocity * 127}`;
+                        // Sammle Namen für Region CSV
+                        noteNamesWithLayers.push(fullName);
                     });
                 }
             }
+
+            console.log(noteNamesWithLayers);
 
             // MIDI -> Blob -> ZIP
             const zip = new JSZip();
@@ -375,7 +382,7 @@
             const noteDurationSec = 4; // z. B. jede Note dauert 4 Sekunden
 
             // CSV zusätzlich generieren
-            const csvContent = generateRegionCSV(noteNames, octaves, noteDurationSec);
+            const csvContent = generateRegionCSV(noteNamesWithLayers, noteDurationSec);
             zip.file(`sfz_regions.csv`, csvContent);
 
             zip.generateAsync({ type: "blob" }).then(blob => {
