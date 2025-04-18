@@ -113,6 +113,9 @@
     <label>Anzahl der Oktaven:</label>
     <input type="number" id="octaves" value="3">
 
+    <label>Startoktave:</label>
+    <input type="number" id="startOctave" value="2">
+
     <label>Dateinamen-Pattern (Nutze [Note], [Layer]):</label>
     <input type="text" id="filenamePattern" value="Piano_[Note]_vel[Layer].wav">
 
@@ -181,11 +184,11 @@
             });
         }
 
-        function generateSFZContent(header, author, comment, noteInput, octaves, pattern, folder, useVel, velocityRanges) {
+        function generateSFZContent(header, author, comment, noteInput, octaves, startOctave, pattern, folder, useVel, velocityRanges) {
             const noteNames = noteInput.split(',').map(n => n.trim());
             let notes = [];
 
-            for (let oct = 0; oct < octaves; oct++) {
+            for (let oct = startOctave; oct < octaves + startOctave; oct++) {
                 for (let note of noteNames) {
                     if (!NOTE_NAMES.includes(note)) {
                         errorCode = 1;
@@ -272,6 +275,7 @@
             const comment = document.getElementById("comment").value;
             const notes = document.getElementById("notes").value;
             const octaves = parseInt(document.getElementById("octaves").value);
+            const startOctave = parseInt(document.getElementById("startOctave").value);
             const pattern = document.getElementById("filenamePattern").value;
             const folder = document.getElementById("folder").value;
             const useVel = document.getElementById("useVelocity").checked;
@@ -294,7 +298,7 @@
                 return;
             }
 
-            const sfzContent = generateSFZContent(header, author, comment, notes, octaves, pattern, folder, useVel, velocityRanges);
+            const sfzContent = generateSFZContent(header, author, comment, notes, octaves, startOctave, pattern, folder, useVel, velocityRanges);
             document.getElementById("output").value = sfzContent;
         }
 
@@ -338,9 +342,10 @@
             const author = document.getElementById("author").value;
             const notesInput = document.getElementById("notes").value;
             const octaves = parseInt(document.getElementById("octaves").value);
+            const startOctave = parseInt(document.getElementById("startOctave").value);
             const useVel = document.getElementById("useVelocity").checked;
             const velRangeInput = document.getElementById("velocityRanges").value;
-            const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [{ low: 80, high: 80 }];
+            const velocityRanges = useVel ? parseVelocityRanges(velRangeInput) : [{ low: 127, high: 127 }];
             const sfzName = document.getElementById("sfzName").value || "instrument";
 
             const noteNames = notesInput.split(',').map(n => n.trim());
@@ -355,7 +360,7 @@
 
             let noteNamesWithLayers = [];
 
-            for (let oct = 0; oct < octaves; oct++) {
+            for (let oct = startOctave; oct < octaves + startOctave; oct++) {
                 for (let note of noteNames) {
                     if (!NOTE_NAMES.includes(note)) continue;
                     const midiNote = noteToMidi(note, oct);
