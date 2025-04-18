@@ -260,8 +260,8 @@
         function isValidVelocityRanges(ranges) {
             for (let i = 0; i < ranges.length; i++) {
                 const { low, high } = ranges[i];
-                if (low < 0 || high > 127 || low > high) return false;
-                if (i > 0 && ranges[i - 1].high >= low) return false;
+                if (low < 0 || high > 127 || low > high) return false; // Ranges
+                if (i > 0 && ranges[i - 1].high >= low) return false; // Ueberschneidungen
             }
             return true;
         }
@@ -362,7 +362,8 @@
                     const noteLabel = `${note}${oct}`;
 
                     velocityRanges.forEach(range => {
-                        const velocity = Math.round((range.low + range.high) / 2) / 127;
+                        //const velocity = Math.round((range.low + range.high) / 2) / 127;
+                        const velocity = range.high / 127;
                         track.addNote({
                             name: midiToNote(midiNote),
                             midi: midiNote,
@@ -379,8 +380,6 @@
                     });
                 }
             }
-
-            console.log(noteNamesWithLayers);
 
             // MIDI -> Blob -> ZIP
             const zip = new JSZip();
